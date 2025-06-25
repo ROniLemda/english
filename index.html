@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שאלון אוצר מילים</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .question-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .question {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            border: 2px solid #cbd5e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            transition: left 0.5s;
+        }
+
+        .option:hover::before {
+            left: 100%;
+        }
+
+        .option:hover {
+            transform: translateY(-3px);
+            border-color: #667eea;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .option.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #5a67d8;
+            transform: scale(1.05);
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-color: #2f855a;
+            color: white;
+        }
+
+        .option.incorrect {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            border-color: #c53030;
+            color: white;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            color: #2f855a;
+            border: 2px solid #48bb78;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            color: #c53030;
+            border: 2px solid #f56565;
+        }
+
+        .add-word-section {
+            margin-bottom: 30px;
+        }
+
+        .add-word-section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .word-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .word-inputs input {
+            padding: 12px 16px;
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            min-width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .word-inputs input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .add-btn, .start-quiz-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-btn:hover, .start-quiz-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .start-quiz-btn {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            font-size: 1.3em;
+            padding: 15px 30px;
+            margin-top: 20px;
+        }
+
+        .mistake-quiz-btn {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            font-size: 1.2em;
+            padding: 12px 25px;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        .current-words {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .current-words h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .words-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .word-item {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .word-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .delete-word {
+            background: #f56565;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-word:hover {
+            background: #e53e3e;
+        }
+
+        .score {
+            font-size: 1.5em;
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(56, 161, 105, 0.3);
+        }
+
+        .clear-all-btn {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            margin-right: 10px;
+        }
+
+        .clear-all-btn:hover {
+            box-shadow: 0 8px 16px rgba(245, 101, 101, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .question {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>🎯 שאלון אוצר מילים</h1>
+        <div style="color: #667eea; font-size: 0.9em; margin-bottom: 20px; font-style: italic;">
+            by Roni_Levy
+        </div>
+        
+        <div class="add-word-section" id="add-word-section">
+            <h2>➕ הוסף מילים חדשות</h2>
+            <div class="word-inputs">
+                <input type="text" id="hebrew-input" placeholder="מילה בעברית" />
+                <input type="text" id="english-input" placeholder="English word" />
+                <button onclick="addWord()" class="add-btn">הוסף מילה</button>
+            </div>
+            <div class="current-words">
+                <h3>המילים הנוכחיות: <span id="word-count">0</span></h3>
+                <div id="words-list"></div>
+            </div>
+            <button onclick="clearAllWords()" class="add-btn clear-all-btn">🗑️ מחק את כל המילים</button>
+            <button onclick="startQuiz()" class="start-quiz-btn">🎯 התחל שאלון</button>
+            <button onclick="startMistakeQuiz()" class="mistake-quiz-btn" id="mistake-quiz-btn" style="display: none;">🔄 תרגול על טעויות</button>
+        </div>
+
+        <div id="quiz-section" style="display: none;">
+            <div id="questions-container"></div>
+        </div>
+        <div id="score" class="score" style="display: none;"></div>
+        <button id="reset-btn" class="reset-btn" style="display: none;" onclick="resetQuiz()">🔄 התחל מחדש</button>
+    </div>
+
+    <script>
+        // ברירת מחדל למילים (יוטענו רק אם אין מילים שמורות)
+        const defaultVocabulary = [
+            { hebrew: 'עברנו', english: 'past' },
+            { hebrew: 'עשורים', english: 'decades' },
+            { hebrew: 'עבר', english: 'past' },
+            { hebrew: 'משמעותי', english: 'significant' },
+            { hebrew: 'עלייה', english: 'increase' }
+        ];
+
+        let vocabulary = [];
+        let currentAnswers = {};
+        let totalQuestions = 0;
+        let mistakeWords = []; // מילים שטעינו בהן
+
+        // טעינת נתונים מ-localStorage
+        function loadData() {
+            try {
+                const savedVocabulary = localStorage.getItem('vocabulary');
+                const savedMistakes = localStorage.getItem('mistakeWords');
+                
+                if (savedVocabulary) {
+                    vocabulary = JSON.parse(savedVocabulary);
+                } else {
+                    // אם אין מילים שמורות, טען את ברירת המחדל
+                    vocabulary = [...defaultVocabulary];
+                    saveVocabulary();
+                }
+                
+                if (savedMistakes) {
+                    mistakeWords = JSON.parse(savedMistakes);
+                }
+            } catch (error) {
+                console.error('שגיאה בטעינת הנתונים:', error);
+                vocabulary = [...defaultVocabulary];
+            }
+        }
+
+        // שמירת אוצר המילים ל-localStorage
+        function saveVocabulary() {
+            try {
+                localStorage.setItem('vocabulary', JSON.stringify(vocabulary));
+            } catch (error) {
+                console.error('שגיאה בשמירת אוצר המילים:', error);
+                alert('שגיאה בשמירת הנתונים. ייתכן שהאחסון מלא.');
+            }
+        }
+
+        // שמירת מילים שטעינו בהן ל-localStorage
+        function saveMistakes() {
+            try {
+                localStorage.setItem('mistakeWords', JSON.stringify(mistakeWords));
+            } catch (error) {
+                console.error('שגיאה בשמירת הטעויות:', error);
+            }
+        }
+
+        function displayWords() {
+            const wordsList = document.getElementById('words-list');
+            const wordCount = document.getElementById('word-count');
+            wordsList.innerHTML = '';
+            wordCount.textContent = vocabulary.length;
+            
+            vocabulary.forEach((word, index) => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                wordItem.innerHTML = `
+                    <span><strong>${word.hebrew}</strong> → ${word.english}</span>
+                    <button class="delete-word" onclick="deleteWord(${index})" title="מחק מילה">×</button>
+                `;
+                wordsList.appendChild(wordItem);
+            });
+        }
+
+        function addWord() {
+            const hebrewInput = document.getElementById('hebrew-input');
+            const englishInput = document.getElementById('english-input');
+            
+            const hebrew = hebrewInput.value.trim();
+            const english = englishInput.value.trim();
+            
+            if (hebrew && english) {
+                // בדיקה אם המילה כבר קיימת
+                const exists = vocabulary.some(word => 
+                    word.hebrew === hebrew || word.english === english
+                );
+                
+                if (exists) {
+                    alert('המילה כבר קיימת ברשימה!');
+                    return;
+                }
+                
+                vocabulary.push({ hebrew, english });
+                saveVocabulary(); // שמירה מיידית
+                
+                hebrewInput.value = '';
+                englishInput.value = '';
+                displayWords();
+                
+                // אפקט חזותי
+                const wordsList = document.getElementById('words-list');
+                const newWord = wordsList.lastElementChild;
+                newWord.style.transform = 'scale(0)';
+                newWord.style.opacity = '0';
+                setTimeout(() => {
+                    newWord.style.transform = 'scale(1)';
+                    newWord.style.opacity = '1';
+                }, 100);
+            } else {
+                alert('אנא מלא את שני השדות');
+            }
+        }
+
+        function deleteWord(index) {
+            if (confirm('האם אתה בטוח שברצונך למחוק את המילה הזו?')) {
+                vocabulary.splice(index, 1);
+                saveVocabulary(); // שמירה מיידית
+                displayWords();
+            }
+        }
+
+        function clearAllWords() {
+            if (confirm('האם אתה בטוח שברצונך למחוק את כל המילים? פעולה זו לא ניתנת לביטול!')) {
+                vocabulary = [];
+                mistakeWords = [];
+                saveVocabulary();
+                saveMistakes();
+                displayWords();
+                
+                // הסתרת כפתור תרגול טעויות
+                document.getElementById('mistake-quiz-btn').style.display = 'none';
+            }
+        }
+
+        function startQuiz() {
+            if (vocabulary.length < 4) {
+                alert('צריך לפחות 4 מילים כדי להתחיל שאלון');
+                return;
+            }
+            
+            mistakeWords = []; // איפוס טעויות
+            saveMistakes();
+            document.getElementById('add-word-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'block';
+            generateQuestions(vocabulary);
+        }
+
+        function startMistakeQuiz() {
+            if (mistakeWords.length === 0) {
+                alert('אין טעויות לתרגול!');
+                return;
+            }
+            
+            document.getElementById('add-word-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'block';
+            generateQuestions(mistakeWords);
+        }
+
+        function backToWordList() {
+            document.getElementById('add-word-section').style.display = 'block';
+            document.getElementById('quiz-section').style.display = 'none';
+            document.getElementById('score').style.display = 'none';
+            document.getElementById('reset-btn').style.display = 'none';
+            
+            // הצגת כפתור תרגול טעויות אם יש טעויות
+            const mistakeBtn = document.getElementById('mistake-quiz-btn');
+            if (mistakeWords.length > 0) {
+                mistakeBtn.style.display = 'inline-block';
+                mistakeBtn.textContent = `🔄 תרגול על ${mistakeWords.length} טעויות`;
+            } else {
+                mistakeBtn.style.display = 'none';
+            }
+        }
+
+        function shuffle(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function generateQuestions(wordList = vocabulary) {
+            const questionsContainer = document.getElementById('questions-container');
+            questionsContainer.innerHTML = '';
+            currentAnswers = {};
+            totalQuestions = 0;
+
+            // הוספת כפתור חזרה
+            addBackButton();
+
+            // יצירת רשימת שאלות עם כיוון רנדומלי
+            const questions = [];
+            wordList.forEach((item, index) => {
+                // יצירת שאלה בכיוון רנדומלי
+                if (Math.random() > 0.5) {
+                    questions.push({
+                        id: `he-${index}`,
+                        question: `מה המשמעות של "${item.hebrew}" באנגלית?`,
+                        correct: item.english,
+                        source: item.hebrew,
+                        wordObj: item
+                    });
+                } else {
+                    questions.push({
+                        id: `en-${index}`,
+                        question: `מה המשמעות של "${item.english}" בעברית?`,
+                        correct: item.hebrew,
+                        source: item.english,
+                        wordObj: item
+                    });
+                }
+            });
+
+            // ערבוב השאלות
+            const shuffledQuestions = shuffle(questions);
+            
+            // יצירת השאלות בסדר מעורבב
+            shuffledQuestions.forEach(q => {
+                createQuestion(q.id, q.question, q.correct, q.source, q.wordObj);
+                totalQuestions++;
+            });
+        }
+
+        function createQuestion(id, questionText, correctAnswer, sourceWord, wordObj) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-container';
+            
+            // יצירת תשובות שגויות
+            const wrongAnswers = vocabulary
+                .filter(item => item.hebrew !== sourceWord && item.english !== sourceWord)
+                .map(item => id.startsWith('he-') ? item.english : item.hebrew)
+                .slice(0, 3);
+            
+            const allOptions = shuffle([correctAnswer, ...wrongAnswers]);
+            
+            const optionsHTML = allOptions.map(option => 
+                `<div class="option" onclick="selectAnswer('${id}', '${option}', '${correctAnswer}', ${JSON.stringify(wordObj).replace(/"/g, '&quot;')})">${option}</div>`
+            ).join('');
+
+            questionDiv.innerHTML = `
+                <div class="question">${questionText}</div>
+                <div class="options">
+                    ${optionsHTML}
+                </div>
+                <div class="feedback" id="feedback-${id}"></div>
+            `;
+
+            document.getElementById('questions-container').appendChild(questionDiv);
+        }
+
+        function selectAnswer(questionId, selectedAnswer, correctAnswer, wordObj) {
+            const options = document.querySelectorAll(`#questions-container .question-container:has(#feedback-${questionId}) .option`);
+            const feedback = document.getElementById(`feedback-${questionId}`);
+            
+            // מניעת בחירה נוספת
+            if (currentAnswers[questionId] !== undefined) return;
+            
+            const isCorrect = selectedAnswer === correctAnswer;
+            currentAnswers[questionId] = isCorrect;
+            
+            // אם טעה, הוסף למילים לתרגול
+            if (!isCorrect && wordObj) {
+                const existingMistake = mistakeWords.find(w => w.hebrew === wordObj.hebrew && w.english === wordObj.english);
+                if (!existingMistake) {
+                    mistakeWords.push(wordObj);
+                    saveMistakes(); // שמירה מיידית
+                }
+            }
+            
+            options.forEach(option => {
+                option.style.cursor = 'default';
+                if (option.textContent === selectedAnswer) {
+                    option.classList.add('selected');
+                    if (isCorrect) {
+                        option.classList.add('correct');
+                        feedback.textContent = '✅ נכון מאוד!';
+                        feedback.className = 'feedback correct show';
+                    } else {
+                        option.classList.add('incorrect');
+                        feedback.textContent = `❌ לא נכון. התשובה הנכונה היא: ${correctAnswer}`;
+                        feedback.className = 'feedback incorrect show';
+                    }
+                } else if (option.textContent === correctAnswer && selectedAnswer !== correctAnswer) {
+                    option.classList.add('correct');
+                }
+            });
+            
+            // בדיקה אם כל השאלות נענו
+            if (Object.keys(currentAnswers).length === totalQuestions) {
+                setTimeout(showScore, 1000);
+            }
+        }
+
+        function showScore() {
+            const correctAnswers = Object.values(currentAnswers).filter(answer => answer).length;
+            const scoreElement = document.getElementById('score');
+            const resetBtn = document.getElementById('reset-btn');
+            
+            let message = '';
+            const percentage = (correctAnswers / totalQuestions) * 100;
+            
+            if (percentage === 100) {
+                message = `🏆 מושלם! ${correctAnswers}/${totalQuestions} - אתה מקצוען!`;
+            } else if (percentage >= 80) {
+                message = `🌟 מעולה! ${correctAnswers}/${totalQuestions} - עבודה נהדרת!`;
+            } else if (percentage >= 60) {
+                message = `👍 טוב! ${correctAnswers}/${totalQuestions} - המשך להתאמן!`;
+            } else {
+                message = `💪 ${correctAnswers}/${totalQuestions} - צריך עוד תרגול, אל תתייאש!`;
+            }
+            
+            scoreElement.textContent = message;
+            scoreElement.style.display = 'block';
+            resetBtn.style.display = 'inline-block';
+        }
+
+        function resetQuiz() {
+            document.getElementById('score').style.display = 'none';
+            document.getElementById('reset-btn').style.display = 'none';
+            generateQuestions(vocabulary);
+        }
+
+        // הוספת כפתור חזרה לרשימת המילים
+        function addBackButton() {
+            const questionsContainer = document.getElementById('questions-container');
+            const backButton = document.createElement('button');
+            backButton.textContent = '🔙 חזור לרשימת המילים';
+            backButton.className = 'reset-btn';
+            backButton.style.marginBottom = '20px';
+            backButton.onclick = backToWordList;
+            questionsContainer.insertBefore(backButton, questionsContainer.firstChild);
+        }
+
+        // התחלת האפליקציה
+        loadData(); // טעינת נתונים שמורים
+        displayWords();
+
+        // הוספת אפשרות להוסיף מילה עם Enter
+        document.getElementById('hebrew-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('english-input').focus();
+            }
+        });
+
+        document.getElementById('english-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addWord();
+            }
+        });
+    </script>
+</body>
+</html>
