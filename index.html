@@ -1249,6 +1249,18 @@
             if (isCorrect) {
                 feedback.textContent = '✅ נכון מאוד!';
                 feedback.className = 'feedback correct show';
+                // מעבר אוטומטי לשאלה הבאה
+                setTimeout(() => {
+                    // מצא את השאלה הבאה
+                    const allQuestions = Array.from(document.querySelectorAll('.question-container'));
+                    const currentIndex = allQuestions.findIndex(q => q.contains(input));
+                    if (currentIndex !== -1 && currentIndex < allQuestions.length - 1) {
+                        const nextInput = allQuestions[currentIndex + 1].querySelector('.text-input');
+                        if (nextInput) {
+                            nextInput.focus();
+                        }
+                    }
+                }, 700);
             } else {
                 feedback.textContent = `❌ לא נכון. התשובה הנכונה היא: ${correctAnswer}`;
                 feedback.className = 'feedback incorrect show';
