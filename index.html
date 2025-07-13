@@ -768,6 +768,7 @@
         let selectedQuizType = 'mixed';
         let personalWords = [];
         let typingDirection = false; // false = לעברית, true = לאנגלית
+        let quizStartTime = null;
 
         function setTypingDirection(toEnglish) {
             typingDirection = toEnglish;
@@ -916,6 +917,7 @@
         }
 
         function startQuiz() {
+            quizStartTime = Date.now();
             if (vocabulary.length < 4) {
                 alert('צריך לפחות 4 מילים כדי להתחיל שאלון');
                 return;
@@ -1294,17 +1296,34 @@
             
             let message = '';
             const percentage = (correctAnswers / totalQuestions) * 100;
-            
-            if (percentage === 100) {
-                message = `🏆 מושלם! ${correctAnswers}/${totalQuestions} - אתה מקצוען!`;
-            } else if (percentage >= 80) {
-                message = `🌟 מעולה! ${correctAnswers}/${totalQuestions} - עבודה נהדרת!`;
-            } else if (percentage >= 60) {
-                message = `👍 טוב! ${correctAnswers}/${totalQuestions} - המשך להתאמן!`;
-            } else {
-                message = `💪 ${correctAnswers}/${totalQuestions} - צריך עוד תרגול, אל תתייאש!`;
+            let challengeMsg = '';
+            let timeMsg = '';
+            let timePassed = 0;
+            if (quizStartTime) {
+                timePassed = Math.round((Date.now() - quizStartTime) / 1000);
             }
-            
+            if (percentage === 100) {
+                challengeMsg = '<br><span style="color:#38a169;font-weight:bold;font-size:1.2em;">🏅 עמדת באתגר: 100% הצלחה!</span>';
+            }
+            if (timePassed > 0 && timePassed <= 60) {
+                timeMsg = '<br><span style="color:#3182ce;font-weight:bold;font-size:1.2em;">⏱️ עמדת באתגר: סיימת בפחות מ-60 שניות!</span>';
+            }
+            if (challengeMsg && timeMsg) {
+                message += '🔥 עמדת בשני האתגרים! 🔥<br>';
+            }
+            if (percentage === 100) {
+                message += `🏆 מושלם! ${correctAnswers}/${totalQuestions} - אתה מקצוען!`;
+            } else if (percentage >= 80) {
+                message += `🌟 מעולה! ${correctAnswers}/${totalQuestions} - עבודה נהדרת!`;
+            } else if (percentage >= 60) {
+                message += `👍 טוב! ${correctAnswers}/${totalQuestions} - המשך להתאמן!`;
+            } else {
+                message += `💪 ${correctAnswers}/${totalQuestions} - צריך עוד תרגול, אל תתייאש!`;
+            }
+            message += challengeMsg + timeMsg;
+            if (timePassed > 0) {
+                message += `<br><span style='font-size:1em;color:#888;'>⏱️ זמן: ${timePassed} שניות</span>`;
+            }
             scoreElement.innerHTML = message + '<br><button onclick="backToWordList()" class="home-btn">חזור למסך הבית</button>';
             scoreElement.style.display = 'block';
             resetBtn.style.display = 'inline-block';
