@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>שאלון אוצר מילים</title>
+    <title>שאלון אוצר מילים מושדרג</title>
     <style>
         * {
             margin: 0;
@@ -27,7 +27,7 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             text-align: center;
         }
@@ -37,6 +37,48 @@
             margin-bottom: 30px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-type-selector {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-type-selector h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .quiz-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .quiz-type-btn {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            border: 2px solid #cbd5e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        .quiz-type-btn:hover {
+            transform: translateY(-2px);
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .quiz-type-btn.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #5a67d8;
         }
 
         .question-container {
@@ -61,11 +103,57 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
 
+        .question-type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
         .options {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 20px;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #cbd5e0;
+            border-radius: 12px;
+            font-size: 1.2em;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-answer-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .submit-answer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(56, 161, 105, 0.3);
         }
 
         .option {
@@ -312,6 +400,10 @@
                 grid-template-columns: 1fr;
             }
             
+            .quiz-types {
+                grid-template-columns: 1fr;
+            }
+            
             h1 {
                 font-size: 2em;
             }
@@ -324,10 +416,7 @@
 </head>
 <body>
     <div class="quiz-container">
-        <h1>🎯 שאלון אוצר מילים</h1>
-        <div style="color: #667eea; font-size: 0.9em; margin-bottom: 20px; font-style: italic;">
-            By: Roni_Levy
-        </div>
+        <h1>🎯 שאלון אוצר מילים מושדרג</h1>
         
         <div class="add-word-section" id="add-word-section">
             <h2>➕ הוסף מילים חדשות</h2>
@@ -340,6 +429,25 @@
                 <h3>המילים הנוכחיות: <span id="word-count">0</span></h3>
                 <div id="words-list"></div>
             </div>
+            
+            <div class="quiz-type-selector">
+                <h3>🎮 בחר סוג שאלון:</h3>
+                <div class="quiz-types">
+                    <div class="quiz-type-btn selected" data-type="mixed" onclick="selectQuizType('mixed')">
+                        🔀 מעורב (בחירה מרובה)
+                    </div>
+                    <div class="quiz-type-btn" data-type="typing" onclick="selectQuizType('typing')">
+                        ⌨️ הקלדה חופשית
+                    </div>
+                    <div class="quiz-type-btn" data-type="firstLetter" onclick="selectQuizType('firstLetter')">
+                        🔤 השלמת אות ראשונה
+                    </div>
+                    <div class="quiz-type-btn" data-type="trueFalse" onclick="selectQuizType('trueFalse')">
+                        ✅❌ נכון/לא נכון
+                    </div>
+                </div>
+            </div>
+            
             <button onclick="clearAllWords()" class="add-btn clear-all-btn">🗑️ מחק את כל המילים</button>
             <button onclick="startQuiz()" class="start-quiz-btn">🎯 התחל שאלון</button>
             <button onclick="startMistakeQuiz()" class="mistake-quiz-btn" id="mistake-quiz-btn" style="display: none;">🔄 תרגול על טעויות</button>
@@ -353,36 +461,47 @@
     </div>
 
     <script>
-        // ברירת מחדל למילים (יוטענו רק אם אין מילים שמורות)
+        // ברירת מחדל למילים
         const defaultVocabulary = [
-            { hebrew: 'עברנו', english: 'past' },
             { hebrew: 'עשורים', english: 'decades' },
             { hebrew: 'עבר', english: 'past' },
             { hebrew: 'משמעותי', english: 'significant' },
-            { hebrew: 'עלייה', english: 'increase' }
+            { hebrew: 'עלייה', english: 'increase' },
+            { hebrew: 'חצי', english: 'half' },
+            { hebrew: 'אוכלוסיה', english: 'population' },
+            { hebrew: 'שליש', english: 'third' },
+            { hebrew: 'עולה', english: 'rising' },
+            { hebrew: 'עירוני', english: 'urban' },
+            { hebrew: 'לעיתים קרובות', english: 'often' },
+            { hebrew: 'סביבה', english: 'environmental' },
+            { hebrew: 'כמה', english: 'few' },
+            { hebrew: 'הבן', english: 'realize' },
+            { hebrew: 'מסויים', english: 'particular' },
+            { hebrew: 'משאב', english: 'resource' },
+            { hebrew: 'תהליך', english: 'process' },
+            { hebrew: 'שיטה', english: 'method' },
+            { hebrew: 'מספק', english: 'providing' },
+            { hebrew: 'לצערי', english: 'unfortunately' },
+            { hebrew: 'מדבר', english: 'deserts' }
         ];
 
         let vocabulary = [];
         let currentAnswers = {};
         let totalQuestions = 0;
-        let mistakeWords = []; // מילים שטעינו בהן
+        let mistakeWords = [];
+        let selectedQuizType = 'mixed';
 
-        // טעינת נתונים מ-localStorage
+        // טעינת נתונים
         function loadData() {
             try {
-                const savedVocabulary = localStorage.getItem('vocabulary');
-                const savedMistakes = localStorage.getItem('mistakeWords');
+                const savedVocabulary = JSON.parse(localStorage.getItem('vocabulary') || '[]');
+                const savedMistakes = JSON.parse(localStorage.getItem('mistakeWords') || '[]');
                 
-                if (savedVocabulary) {
-                    vocabulary = JSON.parse(savedVocabulary);
-                } else {
-                    // אם אין מילים שמורות, טען את ברירת המחדל
-                    vocabulary = [...defaultVocabulary];
+                vocabulary = savedVocabulary.length > 0 ? savedVocabulary : [...defaultVocabulary];
+                mistakeWords = savedMistakes;
+                
+                if (savedVocabulary.length === 0) {
                     saveVocabulary();
-                }
-                
-                if (savedMistakes) {
-                    mistakeWords = JSON.parse(savedMistakes);
                 }
             } catch (error) {
                 console.error('שגיאה בטעינת הנתונים:', error);
@@ -390,7 +509,6 @@
             }
         }
 
-        // שמירת אוצר המילים ל-localStorage
         function saveVocabulary() {
             try {
                 localStorage.setItem('vocabulary', JSON.stringify(vocabulary));
@@ -400,13 +518,20 @@
             }
         }
 
-        // שמירת מילים שטעינו בהן ל-localStorage
         function saveMistakes() {
             try {
                 localStorage.setItem('mistakeWords', JSON.stringify(mistakeWords));
             } catch (error) {
                 console.error('שגיאה בשמירת הטעויות:', error);
             }
+        }
+
+        function selectQuizType(type) {
+            selectedQuizType = type;
+            document.querySelectorAll('.quiz-type-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
         }
 
         function displayWords() {
@@ -434,7 +559,6 @@
             const english = englishInput.value.trim();
             
             if (hebrew && english) {
-                // בדיקה אם המילה כבר קיימת
                 const exists = vocabulary.some(word => 
                     word.hebrew === hebrew || word.english === english
                 );
@@ -445,13 +569,12 @@
                 }
                 
                 vocabulary.push({ hebrew, english });
-                saveVocabulary(); // שמירה מיידית
+                saveVocabulary();
                 
                 hebrewInput.value = '';
                 englishInput.value = '';
                 displayWords();
                 
-                // אפקט חזותי
                 const wordsList = document.getElementById('words-list');
                 const newWord = wordsList.lastElementChild;
                 newWord.style.transform = 'scale(0)';
@@ -468,7 +591,7 @@
         function deleteWord(index) {
             if (confirm('האם אתה בטוח שברצונך למחוק את המילה הזו?')) {
                 vocabulary.splice(index, 1);
-                saveVocabulary(); // שמירה מיידית
+                saveVocabulary();
                 displayWords();
             }
         }
@@ -480,8 +603,6 @@
                 saveVocabulary();
                 saveMistakes();
                 displayWords();
-                
-                // הסתרת כפתור תרגול טעויות
                 document.getElementById('mistake-quiz-btn').style.display = 'none';
             }
         }
@@ -492,7 +613,7 @@
                 return;
             }
             
-            mistakeWords = []; // איפוס טעויות
+            mistakeWords = [];
             saveMistakes();
             document.getElementById('add-word-section').style.display = 'none';
             document.getElementById('quiz-section').style.display = 'block';
@@ -516,7 +637,6 @@
             document.getElementById('score').style.display = 'none';
             document.getElementById('reset-btn').style.display = 'none';
             
-            // הצגת כפתור תרגול טעויות אם יש טעויות
             const mistakeBtn = document.getElementById('mistake-quiz-btn');
             if (mistakeWords.length > 0) {
                 mistakeBtn.style.display = 'inline-block';
@@ -541,86 +661,182 @@
             currentAnswers = {};
             totalQuestions = 0;
 
-            // הוספת כפתור חזרה
             addBackButton();
 
-            // יצירת רשימת שאלות עם כיוון רנדומלי
             const questions = [];
+            
             wordList.forEach((item, index) => {
-                // יצירת שאלה בכיוון רנדומלי
-                if (Math.random() > 0.5) {
-                    questions.push({
-                        id: `he-${index}`,
-                        question: `מה המשמעות של "${item.hebrew}" באנגלית?`,
-                        correct: item.english,
-                        source: item.hebrew,
-                        wordObj: item
-                    });
-                } else {
-                    questions.push({
-                        id: `en-${index}`,
-                        question: `מה המשמעות של "${item.english}" בעברית?`,
-                        correct: item.hebrew,
-                        source: item.english,
-                        wordObj: item
-                    });
+                const direction = Math.random() > 0.5;
+                
+                switch(selectedQuizType) {
+                    case 'mixed':
+                        questions.push(createMixedQuestion(item, index, direction));
+                        break;
+                    case 'typing':
+                        questions.push(createTypingQuestion(item, index, direction));
+                        break;
+                    case 'firstLetter':
+                        questions.push(createFirstLetterQuestion(item, index, direction));
+                        break;
+                    case 'trueFalse':
+                        questions.push(createTrueFalseQuestion(item, index, wordList));
+                        break;
                 }
             });
 
-            // ערבוב השאלות
             const shuffledQuestions = shuffle(questions);
             
-            // יצירת השאלות בסדר מעורבב
             shuffledQuestions.forEach(q => {
-                createQuestion(q.id, q.question, q.correct, q.source, q.wordObj);
+                createQuestionElement(q);
                 totalQuestions++;
             });
         }
 
-        function createQuestion(id, questionText, correctAnswer, sourceWord, wordObj) {
+        function createMixedQuestion(item, index, direction) {
+            return {
+                id: `mixed-${index}`,
+                type: 'mixed',
+                typeName: 'בחירה מרובה',
+                question: direction ? `מה המשמעות של "${item.hebrew}" באנגלית?` : `מה המשמעות של "${item.english}" בעברית?`,
+                correct: direction ? item.english : item.hebrew,
+                source: direction ? item.hebrew : item.english,
+                wordObj: item,
+                direction: direction
+            };
+        }
+
+        function createTypingQuestion(item, index, direction) {
+            return {
+                id: `typing-${index}`,
+                type: 'typing',
+                typeName: 'הקלדה חופשית',
+                question: direction ? `תרגם לאנגלית: "${item.hebrew}"` : `תרגם לעברית: "${item.english}"`,
+                correct: direction ? item.english : item.hebrew,
+                source: direction ? item.hebrew : item.english,
+                wordObj: item,
+                direction: direction
+            };
+        }
+
+        function createFirstLetterQuestion(item, index, direction) {
+            const answer = direction ? item.english : item.hebrew;
+            const hint = answer.charAt(0) + '_'.repeat(answer.length - 1);
+            
+            return {
+                id: `first-${index}`,
+                type: 'firstLetter',
+                typeName: 'השלמת אות ראשונה',
+                question: direction ? `השלם את המילה באנגלית: "${item.hebrew}" = ${hint}` : `השלם את המילה בעברית: "${item.english}" = ${hint}`,
+                correct: answer,
+                source: direction ? item.hebrew : item.english,
+                wordObj: item,
+                direction: direction,
+                hint: hint
+            };
+        }
+
+        function createTrueFalseQuestion(item, index, wordList) {
+            const isTrue = Math.random() > 0.5;
+            let falseAnswer;
+            
+            if (!isTrue) {
+                const otherWords = wordList.filter(w => w !== item);
+                falseAnswer = otherWords[Math.floor(Math.random() * otherWords.length)];
+            }
+            
+            const direction = Math.random() > 0.5;
+            const displayAnswer = isTrue ? 
+                (direction ? item.english : item.hebrew) : 
+                (direction ? falseAnswer.english : falseAnswer.hebrew);
+            
+            return {
+                id: `tf-${index}`,
+                type: 'trueFalse',
+                typeName: 'נכון/לא נכון',
+                question: direction ? 
+                    `האם "${item.hebrew}" פירושו "${displayAnswer}"?` : 
+                    `האם "${item.english}" פירושו "${displayAnswer}"?`,
+                correct: isTrue ? 'נכון' : 'לא נכון',
+                isCorrect: isTrue,
+                wordObj: item,
+                direction: direction
+            };
+        }
+
+        function createQuestionElement(questionData) {
             const questionDiv = document.createElement('div');
             questionDiv.className = 'question-container';
             
-            // יצירת תשובות שגויות
-            const wrongAnswers = vocabulary
-                .filter(item => item.hebrew !== sourceWord && item.english !== sourceWord)
-                .map(item => id.startsWith('he-') ? item.english : item.hebrew)
-                .slice(0, 3);
-            
-            const allOptions = shuffle([correctAnswer, ...wrongAnswers]);
-            
-            const optionsHTML = allOptions.map(option => 
-                `<div class="option" onclick="selectAnswer('${id}', '${option}', '${correctAnswer}', ${JSON.stringify(wordObj).replace(/"/g, '&quot;')})">${option}</div>`
-            ).join('');
-
-            questionDiv.innerHTML = `
-                <div class="question">${questionText}</div>
-                <div class="options">
-                    ${optionsHTML}
-                </div>
-                <div class="feedback" id="feedback-${id}"></div>
+            let contentHTML = `
+                <div class="question-type-badge">${questionData.typeName}</div>
+                <div class="question">${questionData.question}</div>
             `;
-
+            
+            switch(questionData.type) {
+                case 'mixed':
+                    contentHTML += createMixedOptions(questionData);
+                    break;
+                case 'typing':
+                case 'firstLetter':
+                    contentHTML += createTextInput(questionData);
+                    break;
+                case 'trueFalse':
+                    contentHTML += createTrueFalseOptions(questionData);
+                    break;
+            }
+            
+            contentHTML += `<div class="feedback" id="feedback-${questionData.id}"></div>`;
+            questionDiv.innerHTML = contentHTML;
+            
             document.getElementById('questions-container').appendChild(questionDiv);
         }
 
-        function selectAnswer(questionId, selectedAnswer, correctAnswer, wordObj) {
+        function createMixedOptions(questionData) {
+            const wrongAnswers = vocabulary
+                .filter(item => item.hebrew !== questionData.source && item.english !== questionData.source)
+                .map(item => questionData.direction ? item.english : item.hebrew)
+                .slice(0, 3);
+            
+            const allOptions = shuffle([questionData.correct, ...wrongAnswers]);
+            
+            return `
+                <div class="options">
+                    ${allOptions.map(option => 
+                        `<div class="option" onclick="selectMultipleChoice('${questionData.id}', '${option}', '${questionData.correct}', ${JSON.stringify(questionData.wordObj).replace(/"/g, '&quot;')})">${option}</div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        function createTextInput(questionData) {
+            return `
+                <div>
+                    <input type="text" class="text-input" id="input-${questionData.id}" placeholder="הקלד את התשובה כאן...">
+                    <button class="submit-answer-btn" onclick="submitTextAnswer('${questionData.id}', '${questionData.correct}', ${JSON.stringify(questionData.wordObj).replace(/"/g, '&quot;')})">שלח תשובה</button>
+                </div>
+            `;
+        }
+
+        function createTrueFalseOptions(questionData) {
+            return `
+                <div class="options">
+                    <div class="option" onclick="selectTrueFalse('${questionData.id}', 'נכון', '${questionData.correct}', ${JSON.stringify(questionData.wordObj).replace(/"/g, '&quot;')})">✅ נכון</div>
+                    <div class="option" onclick="selectTrueFalse('${questionData.id}', 'לא נכון', '${questionData.correct}', ${JSON.stringify(questionData.wordObj).replace(/"/g, '&quot;')})">❌ לא נכון</div>
+                </div>
+            `;
+        }
+
+        function selectMultipleChoice(questionId, selectedAnswer, correctAnswer, wordObj) {
+            if (currentAnswers[questionId] !== undefined) return;
+            
             const options = document.querySelectorAll(`#questions-container .question-container:has(#feedback-${questionId}) .option`);
             const feedback = document.getElementById(`feedback-${questionId}`);
-            
-            // מניעת בחירה נוספת
-            if (currentAnswers[questionId] !== undefined) return;
             
             const isCorrect = selectedAnswer === correctAnswer;
             currentAnswers[questionId] = isCorrect;
             
-            // אם טעה, הוסף למילים לתרגול
             if (!isCorrect && wordObj) {
-                const existingMistake = mistakeWords.find(w => w.hebrew === wordObj.hebrew && w.english === wordObj.english);
-                if (!existingMistake) {
-                    mistakeWords.push(wordObj);
-                    saveMistakes(); // שמירה מיידית
-                }
+                addToMistakes(wordObj);
             }
             
             options.forEach(option => {
@@ -641,7 +857,91 @@
                 }
             });
             
-            // בדיקה אם כל השאלות נענו
+            checkAllAnswered();
+        }
+
+        function selectTrueFalse(questionId, selectedAnswer, correctAnswer, wordObj) {
+            if (currentAnswers[questionId] !== undefined) return;
+            
+            const options = document.querySelectorAll(`#questions-container .question-container:has(#feedback-${questionId}) .option`);
+            const feedback = document.getElementById(`feedback-${questionId}`);
+            
+            const isCorrect = selectedAnswer === correctAnswer;
+            currentAnswers[questionId] = isCorrect;
+            
+            if (!isCorrect && wordObj) {
+                addToMistakes(wordObj);
+            }
+            
+            options.forEach(option => {
+                option.style.cursor = 'default';
+                const optionText = option.textContent.includes('נכון') ? 'נכון' : 'לא נכון';
+                if (optionText === selectedAnswer) {
+                    option.classList.add('selected');
+                    if (isCorrect) {
+                        option.classList.add('correct');
+                        feedback.textContent = '✅ נכון מאוד!';
+                        feedback.className = 'feedback correct show';
+                    } else {
+                        option.classList.add('incorrect');
+                        feedback.textContent = `❌ לא נכון. התשובה הנכונה היא: ${correctAnswer}`;
+                        feedback.className = 'feedback incorrect show';
+                    }
+                } else if (optionText === correctAnswer && selectedAnswer !== correctAnswer) {
+                    option.classList.add('correct');
+                }
+            });
+            
+            checkAllAnswered();
+        }
+
+        function submitTextAnswer(questionId, correctAnswer, wordObj) {
+            if (currentAnswers[questionId] !== undefined) return;
+            
+            const input = document.getElementById(`input-${questionId}`);
+            const feedback = document.getElementById(`feedback-${questionId}`);
+            const userAnswer = input.value.trim();
+            
+            if (!userAnswer) {
+                alert('אנא הקלד תשובה');
+                return;
+            }
+            
+            const isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+            currentAnswers[questionId] = isCorrect;
+            
+            if (!isCorrect && wordObj) {
+                addToMistakes(wordObj);
+            }
+            
+            input.disabled = true;
+            input.style.background = isCorrect ? '#c6f6d5' : '#fed7d7';
+            input.style.borderColor = isCorrect ? '#48bb78' : '#f56565';
+            
+            if (isCorrect) {
+                feedback.textContent = '✅ נכון מאוד!';
+                feedback.className = 'feedback correct show';
+            } else {
+                feedback.textContent = `❌ לא נכון. התשובה הנכונה היא: ${correctAnswer}`;
+                feedback.className = 'feedback incorrect show';
+            }
+            
+            // הסתרת כפתור השליחה
+            const button = input.parentElement.querySelector('.submit-answer-btn');
+            button.style.display = 'none';
+            
+            checkAllAnswered();
+        }
+
+        function addToMistakes(wordObj) {
+            const existingMistake = mistakeWords.find(w => w.hebrew === wordObj.hebrew && w.english === wordObj.english);
+            if (!existingMistake) {
+                mistakeWords.push(wordObj);
+                saveMistakes();
+            }
+        }
+
+        function checkAllAnswered() {
             if (Object.keys(currentAnswers).length === totalQuestions) {
                 setTimeout(showScore, 1000);
             }
@@ -676,7 +976,6 @@
             generateQuestions(vocabulary);
         }
 
-        // הוספת כפתור חזרה לרשימת המילים
         function addBackButton() {
             const questionsContainer = document.getElementById('questions-container');
             const backButton = document.createElement('button');
@@ -688,7 +987,7 @@
         }
 
         // התחלת האפליקציה
-        loadData(); // טעינת נתונים שמורים
+        loadData();
         displayWords();
 
         // הוספת אפשרות להוסיף מילה עם Enter
@@ -701,6 +1000,18 @@
         document.getElementById('english-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 addWord();
+            }
+        });
+
+        // הוספת אפשרות לשלוח תשובות טקסט עם Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.classList.contains('text-input')) {
+                const questionId = e.target.id.replace('input-', '');
+                const questionContainer = e.target.closest('.question-container');
+                const submitButton = questionContainer.querySelector('.submit-answer-btn');
+                if (submitButton && submitButton.style.display !== 'none') {
+                    submitButton.click();
+                }
             }
         });
     </script>
