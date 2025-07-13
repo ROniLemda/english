@@ -614,6 +614,28 @@
             color: #222 !important;
             box-shadow: 0 4px 16px rgba(102,126,234,0.13);
         }
+        .direction-btn {
+            padding: 10px 20px;
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            color: #4a5568;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .direction-btn:hover {
+            transform: translateY(-2px);
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        .direction-btn.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #5a67d8;
+        }
     </style>
 </head>
 <body>
@@ -653,7 +675,11 @@
                     </div>
                 </div>
             </div>
-            
+            <div id="direction-selector" style="display:flex;justify-content:center;gap:10px;margin:10px 0 20px 0;">
+                <button id="direction-to-hebrew" class="direction-btn selected" onclick="setTypingDirection(false)">תרגם לעברית</button>
+                <button id="direction-to-english" class="direction-btn" onclick="setTypingDirection(true)">תרגם לאנגלית</button>
+            </div>
+
             <button onclick="clearAllWords()" class="add-btn clear-all-btn">🗑️ מחק את כל המילים</button>
             <button onclick="startQuiz()" class="start-quiz-btn">🎯 התחל שאלון</button>
             <button onclick="startPersonalQuiz()" class="start-quiz-btn" id="personal-quiz-btn">⭐ תרגול מילים ספציפיות</button>
@@ -710,7 +736,7 @@
             { hebrew: 'לעיתים קרובות', english: 'often' },
             { hebrew: 'סביבה', english: 'environmental' },
             { hebrew: 'כמה', english: 'few' },
-            { hebrew: 'הבן', english: 'realize' },
+            { hebrew: 'הבין', english: 'realize' },
             { hebrew: 'מסויים', english: 'particulr' },
             { hebrew: 'משאב', english: 'resource' },
             { hebrew: 'תהליך', english: 'process' },
@@ -739,6 +765,13 @@
         let mistakeWords = [];
         let selectedQuizType = 'mixed';
         let personalWords = [];
+        let typingDirection = false; // false = לעברית, true = לאנגלית
+
+        function setTypingDirection(toEnglish) {
+            typingDirection = toEnglish;
+            document.getElementById('direction-to-hebrew').classList.toggle('selected', !toEnglish);
+            document.getElementById('direction-to-english').classList.toggle('selected', toEnglish);
+        }
 
         // טעינת נתונים
         function loadData() {
@@ -956,16 +989,18 @@
             const questions = [];
             
             wordList.forEach((item, index) => {
-                const direction = Math.random() > 0.5;
-                
+                let direction;
                 switch(selectedQuizType) {
                     case 'mixed':
+                        direction = Math.random() > 0.5;
                         questions.push(createMixedQuestion(item, index, direction));
                         break;
                     case 'typing':
+                        direction = typingDirection;
                         questions.push(createTypingQuestion(item, index, direction));
                         break;
                     case 'firstLetter':
+                        direction = Math.random() > 0.5;
                         questions.push(createFirstLetterQuestion(item, index, direction));
                         break;
                     case 'trueFalse':
@@ -1256,7 +1291,7 @@
                 message = `💪 ${correctAnswers}/${totalQuestions} - צריך עוד תרגול, אל תתייאש!`;
             }
             
-            scoreElement.textContent = message;
+            scoreElement.innerHTML = message + '<br><button onclick="backToWordList()" class="home-btn">חזור למסך הבית</button>';
             scoreElement.style.display = 'block';
             resetBtn.style.display = 'inline-block';
         }
