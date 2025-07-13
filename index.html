@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>שאלון אוצר מילים מושדרג</title>
     <style>
+        .words-list.hidden {
+    display: none !important;
+}
         * {
             margin: 0;
             padding: 0;
@@ -19,6 +22,20 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+        }
+
+        .creator-credit {
+            position: fixed;
+            top: 10px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #4a5568;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            font-weight: 500;
         }
 
         .quiz-container {
@@ -364,6 +381,35 @@
             color: #4a5568;
             margin-bottom: 15px;
             font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-words-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .toggle-words-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .words-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            transition: all 0.3s ease;
+            overflow: hidden;
         }
 
         .words-list {
@@ -571,6 +617,7 @@
     </style>
 </head>
 <body>
+    <div class="creator-credit">אתר זה נבנה על ידי רוני לוי</div>
     <div class="quiz-container">
         
         <div class="add-word-section" id="add-word-section">
@@ -581,7 +628,11 @@
                 <button onclick="addWord()" class="add-btn">הוסף מילה</button>
             </div>
             <div class="current-words">
-                <h3>המילים הנוכחיות: <span id="word-count">0</span></h3>
+                <h3>
+                
+                    המילים הנוכחיות: <span id="word-count">0</span>
+                    <button class="toggle-words-btn" onclick="toggleWordsList()" id="toggle-words-btn">הסתר מילים</button>
+                </h3>
                 <div id="words-list"></div>
             </div>
             
@@ -1456,6 +1507,21 @@
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // פונקציה להסתרה/הצגה של רשימת המילים
+        function toggleWordsList() {
+            const wordsList = document.getElementById('words-list');
+            const toggleBtn = document.getElementById('toggle-words-btn');
+            if (wordsList.classList.contains('hidden')) {
+                wordsList.classList.remove('hidden');
+                wordsList.style.display = '';
+                toggleBtn.textContent = 'הסתר מילים';
+            } else {
+                wordsList.classList.add('hidden');
+                wordsList.style.display = 'none';
+                toggleBtn.textContent = 'הצג מילים';
             }
         }
 
