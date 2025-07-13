@@ -199,6 +199,57 @@
 
         .option.correct {
             background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border-color: #38a169;
+        }
+
+        .option.incorrect {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+            border-color: #e53e3e;
+        }
+
+        .quiz-card.correct {
+            border-color: #48bb78;
+            background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+        }
+
+        .quiz-card.incorrect {
+            border-color: #f56565;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        }
+
+        .feedback.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .mc-option {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .mc-option:hover {
+            transform: translateY(-2px);
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .mc-option.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #5a67d8;
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
             border-color: #2f855a;
             color: white;
         }
@@ -460,40 +511,45 @@
         }
         .mc-option {
             width: 100%;
-            padding: 14px 0;
-            margin: 6px 0;
-            border-radius: 12px;
+            padding: 18px 0;
+            margin: 14px 0;
+            border-radius: 18px;
             border: 2px solid #e2e8f0;
-            background: #f7fafc;
+            background: #fff;
             color: #2d3748;
-            font-size: 1.13em;
-            font-weight: 500;
+            font-size: 1.22em;
+            font-weight: 700;
             text-align: center;
             cursor: pointer;
-            transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 8px rgba(102,126,234,0.06);
-            letter-spacing: 0.5px;
+            transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s, transform 0.12s;
+            box-shadow: 0 2px 12px rgba(102,126,234,0.10);
+            letter-spacing: 0.7px;
+            outline: none;
+            position: relative;
         }
         .mc-option:hover {
             background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
             color: #fff;
             border: 2px solid #667eea;
-            box-shadow: 0 4px 16px rgba(102,126,234,0.13);
+            box-shadow: 0 6px 18px rgba(102,126,234,0.18);
+            transform: translateY(-2px) scale(1.03);
         }
         .mc-option.selected {
             background: linear-gradient(135deg,#38a169 0%,#2f855a 100%);
             color: #fff;
             border: 2px solid #38a169;
-            box-shadow: 0 4px 16px rgba(56,161,105,0.13);
+            box-shadow: 0 6px 18px rgba(56,161,105,0.18);
+            transform: scale(1.04);
         }
         .english-word {
-            font-size: 2.1em !important;
+            font-size: 2.3em !important;
             font-weight: 900 !important;
             color: #222 !important;
-            margin-bottom: 18px !important;
-            letter-spacing: 1.2px;
+            margin-bottom: 28px !important;
+            letter-spacing: 1.5px;
             text-align: center !important;
             text-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            line-height: 1.2;
         }
         .next-btn {
             background: #f3f4f6 !important;
@@ -1289,15 +1345,24 @@
                 document.getElementById('personalQuizCard').className = 'quiz-card';
                 input.focus();
                 personalAnswered = false;
-                input.onkeypress = function(e) {
+                
+                // הסר מאזינים קודמים
+                input.removeEventListener('keypress', personalCheckAnswer);
+                
+                // הוסף מאזין חדש
+                input.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         personalCheckAnswer();
                     }
-                };
-                const checkBtn = document.getElementById('personalCheckBtn');
-                if (checkBtn) {
-                    checkBtn.onclick = personalCheckAnswer;
-                }
+                });
+                
+                // הוסף מאזין לכפתור בדוק
+                setTimeout(() => {
+                    const checkBtn = document.querySelector('#personalQuizCard button[onclick="personalCheckAnswer()"]');
+                    if (checkBtn) {
+                        checkBtn.onclick = personalCheckAnswer;
+                    }
+                }, 100);
             } else if (personalPracticeType === 'mc') {
                 personalAnswered = false;
                 document.getElementById('personalFeedback').textContent = '';
@@ -1352,6 +1417,48 @@
             document.getElementById('personal-score').textContent = personalScore;
             document.getElementById('personal-total').textContent = personalTotalAttempts;
         }
+
+        // פונקציה לבדיקת תשובה בהקלדה חופשית
+        function personalCheckAnswer() {
+            if (personalAnswered) return;
+            
+            const input = document.getElementById('personalHebrewInput');
+            const feedbackElement = document.getElementById('personalFeedback');
+            const cardElement = document.getElementById('personalQuizCard');
+            
+            if (!input || !feedbackElement || !cardElement) return;
+            
+            const userAnswer = input.value.trim();
+            const currentWord = personalPracticeWords[personalCurrentWordIndex];
+            const correctAnswer = currentWord.hebrew;
+            
+            personalTotalAttempts++;
+            
+            if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                feedbackElement.innerHTML = '<span style="color:#28a745;font-size:1.2em;font-weight:bold;background:#d4edda;padding:6px 18px;border-radius:8px;display:inline-block;border:2px solid #48bb78;">✓ נכון!</span>';
+                feedbackElement.classList.add('show');
+                cardElement.className = 'quiz-card correct';
+                personalScore++;
+                personalAnswered = true;
+                personalUpdateScore();
+                setTimeout(personalNextWord, 1500);
+            } else {
+                feedbackElement.innerHTML = `<span style="color:#dc3545;font-size:1.2em;font-weight:bold;background:#f8d7da;padding:6px 18px;border-radius:8px;display:inline-block;border:2px solid #dc3545;">✗ טעית!</span><br><span style="color:#155724;font-size:1.1em;background:#d4edda;padding:4px 12px;border-radius:8px;display:inline-block;margin-top:6px;border:2px solid #48bb78;">התשובה הנכונה: ${correctAnswer}</span>`;
+                feedbackElement.classList.add('show');
+                cardElement.className = 'quiz-card incorrect';
+                personalAnswered = false;
+                personalUpdateScore();
+            }
+        }
+
+        // פונקציה לערבוב מערך
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
         // אפשרות Enter
         if (typeof document !== 'undefined') {
             document.addEventListener('DOMContentLoaded', function () {
