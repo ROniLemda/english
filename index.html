@@ -356,6 +356,27 @@
             background: #e53e3e;
         }
 
+        .personal-word-btn {
+            background: #e2e8f0;
+            color: #888;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 15px;
+            margin-right: 5px;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .personal-word-btn:hover {
+            background: #ffd700;
+            color: #222;
+        }
+
         .score {
             font-size: 1.5em;
             margin-top: 30px;
@@ -416,7 +437,6 @@
 </head>
 <body>
     <div class="quiz-container">
-        <h1>🎯 שאלון אוצר מילים מושדרג</h1>
         
         <div class="add-word-section" id="add-word-section">
             <h2>➕ הוסף מילים חדשות</h2>
@@ -450,6 +470,7 @@
             
             <button onclick="clearAllWords()" class="add-btn clear-all-btn">🗑️ מחק את כל המילים</button>
             <button onclick="startQuiz()" class="start-quiz-btn">🎯 התחל שאלון</button>
+            <button onclick="startPersonalQuiz()" class="start-quiz-btn" id="personal-quiz-btn">⭐ תרגול אישי</button>
             <button onclick="startMistakeQuiz()" class="mistake-quiz-btn" id="mistake-quiz-btn" style="display: none;">🔄 תרגול על טעויות</button>
         </div>
 
@@ -458,6 +479,30 @@
         </div>
         <div id="score" class="score" style="display: none;"></div>
         <button id="reset-btn" class="reset-btn" style="display: none;" onclick="resetQuiz()">🔄 התחל מחדש</button>
+    </div>
+
+    <div id="personal-practice-section" style="display:none;">
+        <div class="container" style="max-width:400px;margin:40px auto 0 auto;background:white;border-radius:20px;padding:32px 24px;box-shadow:0 10px 30px rgba(0,0,0,0.15);">
+            <h1 style="text-align:center;color:#333;margin-bottom:24px;font-size:2em;font-weight:700;letter-spacing:0.5px;">תרגול אישי - אוצר מילים</h1>
+            <div class="score" style="text-align:center;font-size:1.1em;font-weight:bold;color:#4a5568;margin-bottom:18px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:16px;padding:10px 0;box-shadow:0 2px 8px rgba(102,126,234,0.08);">
+                ניקוד: <span id="personal-score">0</span> / <span id="personal-total">0</span>
+            </div>
+            <div class="controls" style="text-align:center;margin-bottom:18px;display:flex;gap:10px;justify-content:center;">
+                <button onclick="closePersonalPractice()" class="reset-btn" style="background:#667eea;min-width:70px;">חזור</button>
+                <button onclick="personalResetQuiz()" class="reset-btn" style="background:#38a169;min-width:110px;">התחל מחדש</button>
+                <button onclick="personalNextWord()" class="next-btn" style="background:#764ba2;min-width:110px;">המילה הבאה</button>
+            </div>
+            <div id="personal-quiz-container">
+                <div class="quiz-card" id="personalQuizCard" style="background:#f7fafc;border-radius:14px;padding:22px 12px;margin-bottom:10px;border:2px solid #e2e8f0;box-shadow:0 2px 8px rgba(102,126,234,0.06);">
+                    <div class="english-word" id="personalEnglishWord" style="font-size:1.5em;font-weight:bold;color:#2c3e50;margin-bottom:12px;text-align:center;direction:ltr;letter-spacing:1px;">deserts</div>
+                    <div class="input-container" style="display:flex;gap:8px;margin-bottom:10px;justify-content:center;">
+                        <input type="text" id="personalHebrewInput" placeholder="כתוב את התרגום בעברית..." style="flex:1;padding:12px 16px;border:2px solid #cbd5e0;border-radius:10px;font-size:1.1em;direction:rtl;text-align:center;transition:all 0.2s;max-width:220px;">
+                        <button onclick="personalCheckAnswer()" style="padding:12px 20px;background:#667eea;color:white;border:none;border-radius:8px;cursor:pointer;font-size:1em;font-weight:bold;transition:background 0.2s;">בדוק</button>
+                    </div>
+                    <div class="feedback" id="personalFeedback" style="font-size:1.1em;font-weight:bold;margin-top:10px;text-align:center;min-height:48px;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -490,6 +535,7 @@
         let totalQuestions = 0;
         let mistakeWords = [];
         let selectedQuizType = 'mixed';
+        let personalWords = [];
 
         // טעינת נתונים
         function loadData() {
@@ -526,6 +572,28 @@
             }
         }
 
+        function loadPersonalWords() {
+            try {
+                personalWords = JSON.parse(localStorage.getItem('personalWords') || '[]');
+            } catch {
+                personalWords = [];
+            }
+        }
+        function savePersonalWords() {
+            localStorage.setItem('personalWords', JSON.stringify(personalWords));
+        }
+        function togglePersonalWord(index) {
+            const word = vocabulary[index];
+            const exists = personalWords.some(w => w.hebrew === word.hebrew && w.english === word.english);
+            if (exists) {
+                personalWords = personalWords.filter(w => !(w.hebrew === word.hebrew && w.english === word.english));
+            } else {
+                personalWords.push(word);
+            }
+            savePersonalWords();
+            displayWords();
+        }
+
         function selectQuizType(type) {
             selectedQuizType = type;
             document.querySelectorAll('.quiz-type-btn').forEach(btn => {
@@ -541,11 +609,13 @@
             wordCount.textContent = vocabulary.length;
             
             vocabulary.forEach((word, index) => {
+                const isPersonal = personalWords.some(w => w.hebrew === word.hebrew && w.english === word.english);
                 const wordItem = document.createElement('div');
                 wordItem.className = 'word-item';
                 wordItem.innerHTML = `
                     <span><strong>${word.hebrew}</strong> → ${word.english}</span>
                     <button class="delete-word" onclick="deleteWord(${index})" title="מחק מילה">×</button>
+                    <button class="personal-word-btn" onclick="togglePersonalWord(${index})" title="סמן/הסר לתרגול אישי" style="background:${isPersonal ? '#ffd700' : '#e2e8f0'};color:${isPersonal ? '#222' : '#888'};border-radius:50%;width:22px;height:22px;font-size:15px;margin-right:5px;">⭐</button>
                 `;
                 wordsList.appendChild(wordItem);
             });
@@ -620,6 +690,18 @@
             generateQuestions(vocabulary);
         }
 
+        function startPersonalQuiz() {
+            if (personalWords.length < 1) {
+                alert('סמן לפחות מילה אחת לתרגול אישי!');
+                return;
+            }
+            mistakeWords = [];
+            saveMistakes();
+            document.getElementById('add-word-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'block';
+            generateQuestions(personalWords);
+        }
+
         function startMistakeQuiz() {
             if (mistakeWords.length === 0) {
                 alert('אין טעויות לתרגול!');
@@ -653,6 +735,11 @@
                 [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
             }
             return newArray;
+        }
+
+        // הוספת פונקציה shuffleArray שתפנה ל-shuffle
+        function shuffleArray(arr) {
+            return shuffle(arr);
         }
 
         function generateQuestions(wordList = vocabulary) {
@@ -989,6 +1076,7 @@
 
         // התחלת האפליקציה
         loadData();
+        loadPersonalWords();
         displayWords();
 
         // הוספת אפשרות להוסיף מילה עם Enter
@@ -1015,6 +1103,128 @@
                 }
             }
         });
+
+        // Personal Practice Logic
+        let personalPracticeWords = [];
+        let personalCurrentWordIndex = 0;
+        let personalScore = 0;
+        let personalTotalAttempts = 0;
+        let personalAnswered = false;
+
+        function showPersonalPractice() {
+            if (personalWords.length === 0) {
+                alert('לא סימנת מילים לתרגול אישי!');
+                return;
+            }
+            personalPracticeWords = [...personalWords];
+            shuffleArray(personalPracticeWords);
+            personalCurrentWordIndex = 0;
+            personalScore = 0;
+            personalTotalAttempts = 0;
+            personalAnswered = false;
+            document.getElementById('add-word-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'none';
+            // הסתר גם את הקופסה הראשית
+            var quizContainerDiv = document.querySelector('.quiz-container');
+            if (quizContainerDiv) quizContainerDiv.style.display = 'none';
+            document.getElementById('personal-practice-section').style.display = 'block';
+            personalShowCurrentWord();
+            personalUpdateScore();
+        }
+        function closePersonalPractice() {
+            document.getElementById('personal-practice-section').style.display = 'none';
+            // החזר את הקופסה הראשית
+            var quizContainerDiv = document.querySelector('.quiz-container');
+            if (quizContainerDiv) quizContainerDiv.style.display = '';
+            backToWordList();
+        }
+        function personalShowCurrentWord() {
+            if (!personalPracticeWords.length) return;
+            const word = personalPracticeWords[personalCurrentWordIndex];
+            document.getElementById('personalEnglishWord').textContent = word.english;
+            const input = document.getElementById('personalHebrewInput');
+            input.value = '';
+            const feedbackDiv = document.getElementById('personalFeedback');
+            feedbackDiv.textContent = '';
+            feedbackDiv.classList.remove('show');
+            document.getElementById('personalQuizCard').className = 'quiz-card';
+            input.focus();
+            personalAnswered = false;
+            // מאזין Enter דינמי
+            input.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    personalCheckAnswer();
+                }
+            };
+            // מאזין דינמי לכפתור בדוק
+            const checkBtn = input.parentElement.querySelector('button');
+            if (checkBtn) {
+                checkBtn.onclick = personalCheckAnswer;
+            }
+        }
+        function personalCheckAnswer() {
+            if (!personalPracticeWords.length) return;
+            const userAnswer = document.getElementById('personalHebrewInput').value.trim();
+            const correctAnswer = personalPracticeWords[personalCurrentWordIndex].hebrew;
+            const feedbackElement = document.getElementById('personalFeedback');
+            const cardElement = document.getElementById('personalQuizCard');
+            // אם כבר ענית נכון, עבור למילה הבאה
+            if (personalAnswered && userAnswer === correctAnswer) {
+                personalNextWord();
+                return;
+            }
+            // בדוק תשובה
+            personalTotalAttempts++;
+            if (userAnswer === correctAnswer) {
+                feedbackElement.innerHTML = '<span style="color:#28a745;font-size:1.2em;font-weight:bold;background:#d4edda;padding:6px 18px;border-radius:8px;display:inline-block;border:2px solid #48bb78;">✓ נכון!</span>';
+                feedbackElement.classList.add('show');
+                cardElement.className = 'quiz-card correct';
+                personalScore++;
+                personalUpdateScore();
+                personalAnswered = true;
+                setTimeout(personalNextWord, 500);
+                return;
+            } else {
+                feedbackElement.innerHTML = `<span style="color:#dc3545;font-size:1.2em;font-weight:bold;background:#f8d7da;padding:6px 18px;border-radius:8px;display:inline-block;border:2px solid #dc3545;">✗ טעית, נסה שוב!</span><br><span style="color:#155724;font-size:1.1em;background:#d4edda;padding:4px 12px;border-radius:8px;display:inline-block;margin-top:6px;border:2px solid #48bb78;">התשובה הנכונה: ${correctAnswer}</span>`;
+                feedbackElement.classList.add('show');
+                cardElement.className = 'quiz-card incorrect';
+                personalAnswered = false;
+            }
+            personalUpdateScore();
+        }
+        function personalNextWord() {
+            if (!personalPracticeWords.length) return;
+            personalCurrentWordIndex = (personalCurrentWordIndex + 1) % personalPracticeWords.length;
+            personalShowCurrentWord();
+        }
+        function personalResetQuiz() {
+            shuffleArray(personalPracticeWords);
+            personalCurrentWordIndex = 0;
+            personalScore = 0;
+            personalTotalAttempts = 0;
+            personalAnswered = false;
+            personalShowCurrentWord();
+            personalUpdateScore();
+        }
+        function personalUpdateScore() {
+            document.getElementById('personal-score').textContent = personalScore;
+            document.getElementById('personal-total').textContent = personalTotalAttempts;
+        }
+        // אפשרות Enter
+        if (typeof document !== 'undefined') {
+            document.addEventListener('DOMContentLoaded', function () {
+                const input = document.getElementById('personalHebrewInput');
+                if (input) {
+                    // הסר את המאזין הגלובלי ל-Enter עבור personalHebrewInput
+                    input.removeEventListener('keypress', personalCheckAnswer);
+                }
+            });
+        }
+        // שנה את כפתור 'תרגול אישי' שיקרא ל-showPersonalPractice
+        const personalQuizBtn = document.getElementById('personal-quiz-btn');
+        if (personalQuizBtn) {
+            personalQuizBtn.onclick = showPersonalPractice;
+        }
     </script>
 </body>
 </html>
