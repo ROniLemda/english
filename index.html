@@ -866,7 +866,8 @@
             const options = document.querySelectorAll(`#questions-container .question-container:has(#feedback-${questionId}) .option`);
             const feedback = document.getElementById(`feedback-${questionId}`);
             
-            const isCorrect = selectedAnswer === correctAnswer;
+            // השוואה מדויקת, מתעלמת מרווחים
+            const isCorrect = selectedAnswer.trim() === correctAnswer.trim();
             currentAnswers[questionId] = isCorrect;
             
             if (!isCorrect && wordObj) {
@@ -875,8 +876,8 @@
             
             options.forEach(option => {
                 option.style.cursor = 'default';
-                const optionText = option.textContent.includes('נכון') ? 'נכון' : 'לא נכון';
-                if (optionText === selectedAnswer) {
+                const optionText = option.textContent.trim().includes('לא נכון') ? 'לא נכון' : 'נכון';
+                if (optionText === selectedAnswer.trim()) {
                     option.classList.add('selected');
                     if (isCorrect) {
                         option.classList.add('correct');
@@ -887,7 +888,7 @@
                         feedback.textContent = `❌ לא נכון. התשובה הנכונה היא: ${correctAnswer}`;
                         feedback.className = 'feedback incorrect show';
                     }
-                } else if (optionText === correctAnswer && selectedAnswer !== correctAnswer) {
+                } else if (optionText === correctAnswer.trim() && selectedAnswer.trim() !== correctAnswer.trim()) {
                     option.classList.add('correct');
                 }
             });
